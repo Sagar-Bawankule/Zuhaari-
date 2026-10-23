@@ -77,10 +77,12 @@ export const App: React.FC = () => {
       {/* Rules Modal (Globally Accessible) */}
       <RulesModal />
 
-      {/* Footer */}
-      <footer className="w-full border-t border-charcoal-900 py-3 text-center text-xs text-charcoal-500">
-        Zuhaari — 4-Player Real-Time Multiplayer Card Game &bull; Server-Authoritative &bull; 36 Cards
-      </footer>
+      {/* Footer (hidden during gameplay for clean responsive viewport) */}
+      {!isPlaying && (
+        <footer className="w-full border-t border-charcoal-900 py-3 text-center text-xs text-charcoal-500">
+          Zuhaari — 4-Player Real-Time Multiplayer Card Game &bull; Server-Authoritative &bull; 36 Cards
+        </footer>
+      )}
     </div>
   );
 };

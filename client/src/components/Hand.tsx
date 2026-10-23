@@ -27,7 +27,7 @@ export const Hand: React.FC = () => {
   const sortedCards = useMemo(() => {
     return [...rawCards].sort((a, b) => {
       if (sortOption === 'suit') {
-        // Trump suit can be grouped first if declared, or follow standard suit order
+        // Trump suit grouped first if declared
         const suitOrderA = trumpSuit && a.suit === trumpSuit ? -1 : SUIT_ORDER[a.suit];
         const suitOrderB = trumpSuit && b.suit === trumpSuit ? -1 : SUIT_ORDER[b.suit];
 
@@ -90,60 +90,60 @@ export const Hand: React.FC = () => {
   if (sortedCards.length === 0) return null;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-2 select-none">
+    <div className="w-full max-w-5xl mx-auto px-1 sm:px-2 select-none">
       {/* Hand Status & Sort Controls Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-1.5 mb-1 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 px-2 sm:px-4 py-1 mb-0.5 sm:mb-1 text-[11px] sm:text-xs">
         {/* Left: Card count and turn alert */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="text-charcoal-400 font-medium">
-            Your Hand ({sortedCards.length} cards)
+            Hand ({sortedCards.length})
           </span>
 
           {myTurn && (
-            <span className="text-gold-400 font-semibold animate-pulse flex items-center gap-1.5 bg-gold-500/10 px-3 py-0.5 rounded-full border border-gold-500/30">
+            <span className="text-gold-400 font-semibold animate-pulse flex items-center gap-1 bg-gold-500/10 px-2 sm:px-3 py-0.5 rounded-full border border-gold-500/30 text-[10px] sm:text-xs">
               <span>👉</span>
               <span>
                 {leadSuit
                   ? hasLeadSuit
-                    ? `Must follow ${leadSuit.toUpperCase()}`
-                    : `Void in ${leadSuit.toUpperCase()} — play any card!`
-                  : 'Your lead — play any card!'}
+                    ? `Follow ${leadSuit.toUpperCase()}`
+                    : `Void in ${leadSuit.toUpperCase()} — play any!`
+                  : 'Your turn — lead card!'}
               </span>
             </span>
           )}
         </div>
 
         {/* Right: Sort options */}
-        <div className="flex items-center gap-1 bg-charcoal-900/80 p-0.5 rounded-lg border border-charcoal-700/60">
+        <div className="flex items-center gap-0.5 bg-charcoal-900/80 p-0.5 rounded-lg border border-charcoal-700/60">
           <button
             type="button"
             onClick={() => setSortOption('suit')}
-            title="Group by Suit (♠ ♥ ♣ ♦) and High to Low"
-            className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all ${
+            title="Group by Suit"
+            className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-[11px] font-semibold transition-all ${
               sortOption === 'suit'
                 ? 'bg-gold-500/20 text-gold-300 border border-gold-500/40 shadow-sm'
                 : 'text-charcoal-400 hover:text-ivory-200'
             }`}
           >
-            🔀 By Suit
+            🔀 Suit
           </button>
           <button
             type="button"
             onClick={() => setSortOption('rank')}
-            title="Sort by Rank (A down to 6)"
-            className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all ${
+            title="Sort by Rank"
+            className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-[11px] font-semibold transition-all ${
               sortOption === 'rank'
                 ? 'bg-gold-500/20 text-gold-300 border border-gold-500/40 shadow-sm'
                 : 'text-charcoal-400 hover:text-ivory-200'
             }`}
           >
-            🔢 By Rank
+            🔢 Rank
           </button>
         </div>
       </div>
 
       {/* Cards Fan / Ribbon Tray */}
-      <div className="relative flex justify-center items-end py-4 -space-x-8 sm:-space-x-10 md:-space-x-12 overflow-x-visible">
+      <div className="relative flex justify-center items-end py-1 sm:py-3 -space-x-5 sm:-space-x-8 md:-space-x-11 lg:-space-x-12 overflow-x-visible max-w-full">
         {sortedCards.map((card, index) => {
           const playable = isCardPlayable(card);
           const isSelected = selectedIndex === index;
@@ -152,8 +152,8 @@ export const Hand: React.FC = () => {
           // Compute gentle natural fanning angle
           const mid = (sortedCards.length - 1) / 2;
           const offset = index - mid;
-          const rotateDeg = offset * 1.8;
-          const translateY = Math.abs(offset) * 2;
+          const rotateDeg = offset * 1.5;
+          const translateY = Math.abs(offset) * 1.5;
 
           return (
             <div

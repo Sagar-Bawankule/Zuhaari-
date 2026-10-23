@@ -10,16 +10,16 @@ export const CardBack: React.FC<CardBackProps> = ({
   size = 'md',
 }) => {
   const dimensions = {
-    sm: 'w-14 h-20 sm:w-16 sm:h-22',
-    md: 'w-18 h-25 sm:w-20 sm:h-28 md:w-22 md:h-31',
-    lg: 'w-24 h-34 sm:w-28 sm:h-39',
+    sm: 'w-9 h-13 sm:w-12 sm:h-17 md:w-14 md:h-20',
+    md: 'w-14 h-20 sm:w-18 sm:h-25 md:w-20 md:h-28',
+    lg: 'w-20 h-28 sm:w-24 sm:h-34 md:w-28 md:h-39',
   }[size];
 
   return (
     <div
       className={`
-        relative select-none rounded-xl overflow-hidden
-        shadow-[0_4px_12px_rgba(0,0,0,0.35),0_1px_3px_rgba(0,0,0,0.2)]
+        relative select-none rounded-lg sm:rounded-xl overflow-hidden shrink-0
+        shadow-[0_2px_8px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]
         flex items-center justify-center
         ${dimensions}
         ${className}

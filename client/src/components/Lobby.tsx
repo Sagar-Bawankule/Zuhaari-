@@ -39,9 +39,9 @@ export const Lobby: React.FC = () => {
   const seats: SeatIndex[] = [0, 1, 2, 3];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-3 sm:py-6 animate-fade-in w-full">
       {/* Top Banner / Room Code Callout */}
-      <div className="glass-panel p-6 mb-8 text-center border-gold-600/30">
+      <div className="glass-panel p-4 sm:p-6 mb-4 sm:mb-6 text-center border-gold-600/30">
         <span className="text-xs uppercase tracking-widest text-gold-400 font-semibold">
           Private Room Lobby
         </span>
