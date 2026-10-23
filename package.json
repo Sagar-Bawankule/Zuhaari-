@@ -1,0 +1,20 @@
+{
+  "name": "zuhaari",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zuhaari — A real-time multiplayer card game",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
+    "test": "cd server && npm test",
+    "test:watch": "cd server && npm run test:watch",
+    "lint": "cd client && npm run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
