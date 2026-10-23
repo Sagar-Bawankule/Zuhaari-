@@ -1,23 +1,45 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { useCutpattiStore } from '../store/cutpattiStore';
+import { useAppStore } from '../store/appStore';
+import { GameSelector } from './GameSelector';
 
 export const Header: React.FC = () => {
-  const {
-    roomCode,
-    isConnected,
-    isReconnecting,
-    soundMuted,
-    toggleMute,
-    leaveRoom,
-    setShowRulesModal,
-  } = useGameStore();
+  const { gameMode } = useAppStore();
+
+  // Zuhaari state
+  const zuhaariRoomCode = useGameStore((s) => s.roomCode);
+  const zuhaariConnected = useGameStore((s) => s.isConnected);
+  const zuhaariReconnecting = useGameStore((s) => s.isReconnecting);
+  const zuhaariMuted = useGameStore((s) => s.soundMuted);
+  const zuhaariToggleMute = useGameStore((s) => s.toggleMute);
+  const zuhaariLeaveRoom = useGameStore((s) => s.leaveRoom);
+  const zuhaariSetShowRules = useGameStore((s) => s.setShowRulesModal);
+
+  // Cutpatti state
+  const cutpattiRoomCode = useCutpattiStore((s) => s.roomCode);
+  const cutpattiConnected = useCutpattiStore((s) => s.isConnected);
+  const cutpattiReconnecting = useCutpattiStore((s) => s.isReconnecting);
+  const cutpattiMuted = useCutpattiStore((s) => s.soundMuted);
+  const cutpattiToggleMute = useCutpattiStore((s) => s.toggleMute);
+  const cutpattiLeaveRoom = useCutpattiStore((s) => s.leaveRoom);
+  const cutpattiSetShowRules = useCutpattiStore((s) => s.setShowRulesModal);
+
+  const isCutpatti = gameMode === 'cutpatti';
+  const currentRoomCode = isCutpatti ? cutpattiRoomCode : zuhaariRoomCode;
+  const isConnected = isCutpatti ? cutpattiConnected : zuhaariConnected;
+  const isReconnecting = isCutpatti ? cutpattiReconnecting : zuhaariReconnecting;
+  const soundMuted = isCutpatti ? cutpattiMuted : zuhaariMuted;
+  const toggleMute = isCutpatti ? cutpattiToggleMute : zuhaariToggleMute;
+  const leaveRoom = isCutpatti ? cutpattiLeaveRoom : zuhaariLeaveRoom;
+  const setShowRules = isCutpatti ? cutpattiSetShowRules : zuhaariSetShowRules;
 
   const [copied, setCopied] = useState(false);
 
   const handleCopyCode = async () => {
-    if (!roomCode) return;
+    if (!currentRoomCode) return;
     try {
-      await navigator.clipboard.writeText(roomCode);
+      await navigator.clipboard.writeText(currentRoomCode);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -30,37 +52,59 @@ export const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
         {/* Brand */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-charcoal-950 font-display font-extrabold text-base sm:text-xl shadow-glow-gold/30">
-            🎴
+          <div
+            className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center font-display font-extrabold text-base sm:text-xl shadow-md ${
+              isCutpatti
+                ? 'bg-gradient-to-br from-emerald-400 to-teal-500 text-charcoal-950 shadow-emerald-950/30'
+                : 'bg-gradient-to-br from-gold-400 to-gold-600 text-charcoal-950 shadow-gold-950/30'
+            }`}
+          >
+            {isCutpatti ? '🃏' : '🎴'}
           </div>
           <div>
             <h1 className="font-display font-black text-sm sm:text-lg tracking-wider text-ivory-100 flex items-center gap-1 leading-tight">
-              ZUHAARI
-              <span className="text-[9px] sm:text-xs px-1.5 py-0.2 rounded-full bg-gold-500/20 text-gold-400 font-sans font-medium border border-gold-500/30 hidden xs:inline">
-                36
+              {isCutpatti ? 'CUTPATTI' : 'ZUHAARI'}
+              <span
+                className={`text-[9px] sm:text-xs px-1.5 py-0.2 rounded-full font-sans font-medium border hidden xs:inline ${
+                  isCutpatti
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                    : 'bg-gold-500/20 text-gold-400 border-gold-500/30'
+                }`}
+              >
+                {isCutpatti ? '52' : '36'}
               </span>
             </h1>
           </div>
         </div>
 
-        {/* Center: Room Code badge if in room */}
-        {roomCode && (
-          <div className="flex items-center gap-1 sm:gap-2 bg-charcoal-800/80 border border-charcoal-700/60 rounded-lg sm:rounded-xl px-2 sm:px-3 py-1">
-            <span className="text-[10px] sm:text-xs text-charcoal-400 font-medium hidden xs:inline">
-              Room:
-            </span>
-            <span className="font-mono font-bold text-gold-400 tracking-wider text-xs sm:text-base">
-              {roomCode}
-            </span>
-            <button
-              onClick={handleCopyCode}
-              title="Copy Room Code"
-              className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded bg-charcoal-700/80 hover:bg-gold-500/20 text-ivory-100 transition-colors border border-charcoal-600/50"
-            >
-              {copied ? '✓' : 'Copy'}
-            </button>
-          </div>
-        )}
+        {/* Center: Game Selector & Active Room Code */}
+        <div className="flex items-center gap-2">
+          {/* Game Selector prominently displayed */}
+          <GameSelector />
+
+          {/* Active Room Code badge if in room */}
+          {currentRoomCode && (
+            <div className="hidden md:flex items-center gap-1 sm:gap-2 bg-charcoal-800/80 border border-charcoal-700/60 rounded-lg sm:rounded-xl px-2 sm:px-3 py-1">
+              <span className="text-[10px] sm:text-xs text-charcoal-400 font-medium">
+                Room:
+              </span>
+              <span
+                className={`font-mono font-bold tracking-wider text-xs sm:text-sm ${
+                  isCutpatti ? 'text-emerald-400' : 'text-gold-400'
+                }`}
+              >
+                {currentRoomCode}
+              </span>
+              <button
+                onClick={handleCopyCode}
+                title="Copy Room Code"
+                className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded bg-charcoal-700/80 hover:bg-charcoal-600 text-ivory-100 transition-colors border border-charcoal-600/50"
+              >
+                {copied ? '✓' : 'Copy'}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Right action controls */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
@@ -78,7 +122,7 @@ export const Header: React.FC = () => {
                 isConnected && !isReconnecting ? 'bg-emerald-400' : 'bg-amber-400'
               }`}
             />
-            <span className="hidden md:inline text-[11px]">
+            <span className="hidden lg:inline text-[11px]">
               {isConnected && !isReconnecting ? 'Live' : 'Reconnecting'}
             </span>
           </div>
@@ -95,7 +139,7 @@ export const Header: React.FC = () => {
 
           {/* Rules Button */}
           <button
-            onClick={() => setShowRulesModal(true)}
+            onClick={() => setShowRules(true)}
             aria-label="How to play rules"
             title="How to play"
             className="w-7 h-7 sm:w-auto sm:px-3 sm:h-9 rounded-lg sm:rounded-xl bg-charcoal-800/80 hover:bg-charcoal-700 text-ivory-200 border border-charcoal-700 flex items-center justify-center gap-1 text-xs font-medium transition-colors"
@@ -105,7 +149,7 @@ export const Header: React.FC = () => {
           </button>
 
           {/* Leave Room Button */}
-          {roomCode && (
+          {currentRoomCode && (
             <button
               onClick={leaveRoom}
               title="Leave Room"

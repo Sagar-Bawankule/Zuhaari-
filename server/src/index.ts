@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { registerHandlers } from './sockets/handlers';
+import { registerCutpattiHandlers } from './sockets/cutpattiHandlers';
 
 dotenv.config();
 
@@ -19,7 +20,11 @@ app.use(express.json());
 
 // Health check
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', game: 'Zuhaari', timestamp: Date.now() });
+  res.json({
+    status: 'ok',
+    games: ['Zuhaari', 'Cutpatti'],
+    timestamp: Date.now(),
+  });
 });
 
 const httpServer = createServer(app);
@@ -35,6 +40,7 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
   console.log(`[${new Date().toISOString()}] Player connected: ${socket.id}`);
   registerHandlers(io, socket);
+  registerCutpattiHandlers(io, socket);
 });
 
 httpServer.listen(PORT, () => {

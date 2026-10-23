@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card as CardType } from '@shared/constants';
+import { CutpattiCard } from '@shared/cutpatti/constants';
 
 interface CardProps {
-  card: CardType;
+  card: CardType | CutpattiCard;
   isPlayable?: boolean;
   isSelected?: boolean;
   isTrump?: boolean;
