@@ -68,10 +68,11 @@ export const App: React.FC = () => {
     (zuhaariRoom?.status === RoomStatus.InGame || zuhaariRoom?.status === RoomStatus.Finished);
 
   // Determine active Cutpatti screens
-  const isInCutpattiRoom = Boolean(cutpattiRoomCode && cutpattiRoom);
-  const isCutpattiPlaying =
-    isInCutpattiRoom &&
-    (cutpattiRoom?.status === RoomStatus.InGame || cutpattiRoom?.status === RoomStatus.Finished);
+  const isInCutpattiRoom = Boolean(cutpattiRoomCode);
+  const isCutpattiPlaying = Boolean(
+    cutpattiRoom &&
+      (cutpattiRoom.status === RoomStatus.InGame || cutpattiRoom.status === RoomStatus.Finished)
+  );
 
   const isCutpatti = gameMode === 'cutpatti';
   const activeError = isCutpatti ? cutpattiError : zuhaariError;

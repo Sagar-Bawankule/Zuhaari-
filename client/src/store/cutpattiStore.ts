@@ -181,48 +181,72 @@ export const useCutpattiStore = create<CutpattiStore>((set, get) => ({
     if ((socket as any)._cutpattiListenersRegistered) return;
     (socket as any)._cutpattiListenersRegistered = true;
 
-    socket.on('connect', () => {
-      set({ isConnected: true, isReconnecting: false });
+    const checkReconnect = () => {
       const { roomCode, sessionToken } = get();
       if (roomCode && sessionToken) {
+        set({ isReconnecting: true });
         socket.emit(CutpattiClientEvent.Reconnect, { roomCode, sessionToken });
       }
+    };
+
+    socket.on('connect', () => {
+      set({ isConnected: true, isReconnecting: false });
+      checkReconnect();
     });
 
     socket.on('disconnect', () => {
       set({ isConnected: false });
     });
 
+    // Check immediately if socket is already connected when listeners are initialized
+    if (socket.connected) {
+      set({ isConnected: true });
+      checkReconnect();
+    }
+
     socket.on(CutpattiServerEvent.RoomCreated, (data: CutpattiRoomCreatedPayload) => {
       localStorage.setItem(STORAGE_KEY_ROOM, data.roomCode);
       localStorage.setItem(STORAGE_KEY_SESSION, data.sessionToken);
-      set({
+      set((state) => ({
         roomCode: data.roomCode,
         sessionToken: data.sessionToken,
         myPlayerId: data.playerId,
+        room: data.room || state.room,
         notification: null,
         error: null,
-      });
+        isReconnecting: false,
+      }));
     });
 
     socket.on(CutpattiServerEvent.RoomJoined, (data: CutpattiRoomJoinedPayload) => {
       localStorage.setItem(STORAGE_KEY_ROOM, data.roomCode);
       localStorage.setItem(STORAGE_KEY_SESSION, data.sessionToken);
-      set({
+      set((state) => ({
         roomCode: data.roomCode,
         sessionToken: data.sessionToken,
         myPlayerId: data.playerId,
+        room: data.room || state.room,
         notification: null,
         error: null,
-      });
+        isReconnecting: false,
+      }));
     });
 
     socket.on(CutpattiServerEvent.RoomUpdated, (room: CutpattiClientRoom) => {
-      set({ room });
+      set({ room, isReconnecting: false });
     });
 
     socket.on(CutpattiServerEvent.RoomError, (data: CutpattiRoomErrorPayload) => {
-      set({ error: data.message, notification: null });
+      if (
+        data.message.toLowerCase().includes('not exist') ||
+        data.message.toLowerCase().includes('not found') ||
+        data.message.toLowerCase().includes('invalid session')
+      ) {
+        localStorage.removeItem(STORAGE_KEY_ROOM);
+        localStorage.removeItem(STORAGE_KEY_SESSION);
+        set({ roomCode: null, sessionToken: null, room: null, gameState: null });
+      }
+      set({ error: data.message, notification: null, isReconnecting: false });
     });
 
     socket.on(CutpattiServerEvent.GameError, (data: CutpattiGameErrorPayload) => {

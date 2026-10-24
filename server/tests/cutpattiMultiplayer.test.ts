@@ -70,13 +70,17 @@ describe('Cutpatti Multiplayer Socket.IO Flow', () => {
       clientB.once(CutpattiServerEvent.RoomJoined, resolve);
     });
     clientB.emit(CutpattiClientEvent.JoinRoom, { roomCode, playerName: 'Bob' });
-    await joinBPromise;
+    const joinBData = await joinBPromise;
+    expect(joinBData.room).toBeDefined();
+    expect(joinBData.room?.players.length).toBe(2);
 
     const joinCPromise = new Promise<CutpattiRoomJoinedPayload>((resolve) => {
       clientC.once(CutpattiServerEvent.RoomJoined, resolve);
     });
     clientC.emit(CutpattiClientEvent.JoinRoom, { roomCode, playerName: 'Charlie' });
-    await joinCPromise;
+    const joinCData = await joinCPromise;
+    expect(joinCData.room).toBeDefined();
+    expect(joinCData.room?.players.length).toBe(3);
 
     // 3. Players B and C toggle ready
     const allReadyPromise = new Promise<CutpattiClientRoom>((resolve) => {

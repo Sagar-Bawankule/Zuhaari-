@@ -19,7 +19,39 @@ export const CutpattiLobby: React.FC = () => {
 
   const [copied, setCopied] = useState(false);
 
-  if (!room) return null;
+  if (!room) {
+    return (
+      <div className="w-full max-w-md mx-auto px-4 py-16 animate-fade-in flex flex-col items-center text-center">
+        <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-3xl mb-4 animate-pulse">
+          🃏
+        </div>
+        <h2 className="font-display font-black text-2xl text-ivory-100 mb-2">
+          Connecting to Cutpatti Room...
+        </h2>
+        {roomCode && (
+          <p className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-full mb-4">
+            Room Code: {roomCode}
+          </p>
+        )}
+        <div className="flex items-center gap-2 text-xs text-charcoal-400 mb-6">
+          <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+          <span>Syncing lobby details with server</span>
+        </div>
+        {error && (
+          <div className="mb-4 p-3 bg-red-950/60 border border-red-800/60 rounded-xl text-red-300 text-xs max-w-xs">
+            {error}
+          </div>
+        )}
+        <button
+          onClick={leaveRoom}
+          type="button"
+          className="py-2.5 px-5 rounded-xl font-display font-semibold text-xs text-red-300 hover:text-red-200 bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 transition-colors"
+        >
+          Cancel & Leave
+        </button>
+      </div>
+    );
+  }
 
   const players = room.players || [];
   const playerCount = players.length;

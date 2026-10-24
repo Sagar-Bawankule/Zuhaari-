@@ -21,27 +21,24 @@ export const CutpattiGameTable: React.FC = () => {
     trickNotice,
   } = useCutpattiStore();
 
-  if (!gameState) return null;
-
-  const players = gameState.players || [];
+  const players = gameState?.players || [];
   const playerCount = players.length;
   const myPlayer = players.find((p) => p.id === myPlayerId);
   const mySeatIndex = myPlayer ? myPlayer.seatIndex : 0;
   const myTurn = isMyTurn();
-  const trump = gameState.trumpSuit;
-  const trumpColor = CUTPATTI_SUIT_COLORS[trump];
 
   // Sort player's hand by suit and descending rank strength for convenient play
   const sortedHand = useMemo(() => {
-    return [...(gameState.myHand || [])].sort((a, b) => {
+    if (!gameState?.myHand) return [];
+    return [...gameState.myHand].sort((a, b) => {
       if (a.suit !== b.suit) return a.suit.localeCompare(b.suit);
       return b.strength - a.strength;
     });
-  }, [gameState.myHand]);
+  }, [gameState?.myHand]);
 
   // Determine relative seating so current player is always at the bottom
   const relativeOpponents = useMemo(() => {
-    if (!myPlayer) return [];
+    if (!myPlayer || !gameState) return [];
     const opponents = [];
     for (let i = 1; i < playerCount; i++) {
       const seat = (mySeatIndex + i) % playerCount;
@@ -49,7 +46,34 @@ export const CutpattiGameTable: React.FC = () => {
       if (player) opponents.push({ player, relativePos: i });
     }
     return opponents;
-  }, [myPlayer, mySeatIndex, playerCount, players]);
+  }, [myPlayer, mySeatIndex, playerCount, players, gameState]);
+
+  if (!gameState) {
+    return (
+      <div className="w-full max-w-md mx-auto px-4 py-16 animate-fade-in flex flex-col items-center text-center">
+        <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-3xl mb-4 animate-pulse">
+          🎴
+        </div>
+        <h2 className="font-display font-black text-2xl text-ivory-100 mb-2">
+          Loading Cutpatti Game...
+        </h2>
+        <div className="flex items-center gap-2 text-xs text-charcoal-400 mb-6">
+          <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+          <span>Dealing cards and synchronizing game table</span>
+        </div>
+        <button
+          onClick={() => useCutpattiStore.getState().leaveRoom()}
+          type="button"
+          className="py-2.5 px-5 rounded-xl font-display font-semibold text-xs text-red-300 hover:text-red-200 bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 transition-colors"
+        >
+          Leave Game
+        </button>
+      </div>
+    );
+  }
+
+  const trump = gameState.trumpSuit;
+  const trumpColor = CUTPATTI_SUIT_COLORS[trump];
 
   /**
    * Layout position CSS classes for variable player counts (3–6 players)

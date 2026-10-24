@@ -60,12 +60,14 @@ export interface CutpattiRoomCreatedPayload {
   roomCode: string;
   sessionToken: string;
   playerId: string;
+  room?: CutpattiClientRoom;
 }
 
 export interface CutpattiRoomJoinedPayload {
   roomCode: string;
   sessionToken: string;
   playerId: string;
+  room?: CutpattiClientRoom;
 }
 
 export interface CutpattiRoomErrorPayload {

@@ -29,12 +29,17 @@ export function registerCutpattiHandlers(io: Server, socket: Socket) {
 
     for (const player of room.players) {
       const clientState = engine.getClientState(player.id);
-      io.to(player.id).emit(CutpattiServerEvent.GameStateUpdate, clientState);
+      const targetSocket = io.sockets.sockets.get(player.id);
+      if (targetSocket) {
+        targetSocket.emit(CutpattiServerEvent.GameStateUpdate, clientState);
+      } else {
+        io.to(player.id).emit(CutpattiServerEvent.GameStateUpdate, clientState);
+      }
     }
   }
 
   // ─── Create Room ─────────────────────────────────────────
-  socket.on(CutpattiClientEvent.CreateRoom, (data: unknown) => {
+  socket.on(CutpattiClientEvent.CreateRoom, async (data: unknown) => {
     try {
       const parsed = createCutpattiRoomSchema.safeParse(data);
       if (!parsed.success) {
@@ -49,14 +54,16 @@ export function registerCutpattiHandlers(io: Server, socket: Socket) {
         socket.id
       );
 
-      socket.join(room.code);
+      await socket.join(room.code);
 
       socket.emit(CutpattiServerEvent.RoomCreated, {
         roomCode: room.code,
         sessionToken,
         playerId: player.id,
+        room,
       });
 
+      socket.emit(CutpattiServerEvent.RoomUpdated, room);
       emitCutpattiRoomUpdate(room.code);
     } catch (err: any) {
       socket.emit(CutpattiServerEvent.RoomError, {
@@ -66,7 +73,7 @@ export function registerCutpattiHandlers(io: Server, socket: Socket) {
   });
 
   // ─── Join Room ───────────────────────────────────────────
-  socket.on(CutpattiClientEvent.JoinRoom, (data: unknown) => {
+  socket.on(CutpattiClientEvent.JoinRoom, async (data: unknown) => {
     try {
       const parsed = joinCutpattiRoomSchema.safeParse(data);
       if (!parsed.success) {
@@ -82,14 +89,16 @@ export function registerCutpattiHandlers(io: Server, socket: Socket) {
         socket.id
       );
 
-      socket.join(room.code);
+      await socket.join(room.code);
 
       socket.emit(CutpattiServerEvent.RoomJoined, {
         roomCode: room.code,
         sessionToken,
         playerId: player.id,
+        room,
       });
 
+      socket.emit(CutpattiServerEvent.RoomUpdated, room);
       emitCutpattiRoomUpdate(room.code);
     } catch (err: any) {
       socket.emit(CutpattiServerEvent.RoomError, {
@@ -137,8 +146,14 @@ export function registerCutpattiHandlers(io: Server, socket: Socket) {
       if (room) {
         for (const player of room.players) {
           const clientState = engine.getClientState(player.id);
-          io.to(player.id).emit(CutpattiServerEvent.GameStarted, clientState);
-          io.to(player.id).emit(CutpattiServerEvent.GameStateUpdate, clientState);
+          const targetSocket = io.sockets.sockets.get(player.id);
+          if (targetSocket) {
+            targetSocket.emit(CutpattiServerEvent.GameStarted, clientState);
+            targetSocket.emit(CutpattiServerEvent.GameStateUpdate, clientState);
+          } else {
+            io.to(player.id).emit(CutpattiServerEvent.GameStarted, clientState);
+            io.to(player.id).emit(CutpattiServerEvent.GameStateUpdate, clientState);
+          }
         }
       }
     } catch (err: any) {
@@ -257,7 +272,7 @@ export function registerCutpattiHandlers(io: Server, socket: Socket) {
   });
 
   // ─── Reconnect ───────────────────────────────────────────
-  socket.on(CutpattiClientEvent.Reconnect, (data: unknown) => {
+  socket.on(CutpattiClientEvent.Reconnect, async (data: unknown) => {
     try {
       const parsed = reconnectCutpattiSchema.safeParse(data);
       if (!parsed.success) return;
@@ -268,14 +283,16 @@ export function registerCutpattiHandlers(io: Server, socket: Socket) {
         socket.id
       );
 
-      socket.join(room.code);
+      await socket.join(room.code);
 
       socket.emit(CutpattiServerEvent.RoomJoined, {
         roomCode: room.code,
         sessionToken: player.sessionToken,
         playerId: player.id,
+        room,
       });
 
+      socket.emit(CutpattiServerEvent.RoomUpdated, room);
       emitCutpattiRoomUpdate(room.code);
 
       if (engine) {
